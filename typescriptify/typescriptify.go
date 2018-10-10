@@ -23,6 +23,7 @@ type TypeScriptify struct {
 	CreateFromMethod bool
 	BackupDir        string // If empty no backup
 	DontExport       bool
+	Exclude          map[reflect.Type]bool
 
 	golangTypes []reflect.Type
 	types       map[reflect.Kind]string
@@ -209,6 +210,11 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 	if _, found := t.alreadyConverted[typeOf]; found { // Already converted
 		return "", nil
 	}
+
+	if _, found := t.Exclude[typeOf]; found { // Exist in exclude
+		return "", nil
+	}
+
 	t.alreadyConverted[typeOf] = true
 
 	entityName := fmt.Sprintf("%s%s%s", t.Prefix, t.Suffix, typeOf.Name())
