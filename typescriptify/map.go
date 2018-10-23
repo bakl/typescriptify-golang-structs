@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 	"fmt"
-	"github.com/Sirupsen/logrus"
 )
 
 func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]string) (string, []reflect.Type, error) {
@@ -97,9 +96,6 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 					return "", types, err
 					types = append(types, field.Type.Elem())
 				} else {
-					logrus.Info(field.Type.Elem().Name())
-					logrus.Info(t.typesPathes[field.Type.Elem()])
-
 					builder.AddImport(field.Type.Elem().Name(), t.typesPathes[field.Type.Elem()])
 				}
 				result = typeScriptChunk + "\n" + result
