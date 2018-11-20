@@ -1,10 +1,11 @@
 package typescriptify
 
 import (
+	"fmt"
+	"github.com/Sirupsen/logrus"
 	"reflect"
 	"strings"
 	"time"
-	"fmt"
 )
 
 func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]string) (string, []reflect.Type, error) {
@@ -103,6 +104,10 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 			} else { // Slice of simple fields:
 				err = builder.AddSimpleArrayField(jsonFieldName, field.Type.Elem().Name(), field.Type.Elem().Kind())
 			}
+		case reflect.Map:
+			logrus.Info(field.Type.Elem().Name())
+			//@TODO Struct
+			builder.AddMapOfSimpleField(jsonFieldName, field.Type.Key().Name(), field.Type.Elem().Kind())
 		default:
 			err = builder.AddSimpleField(jsonFieldName, field)
 		}

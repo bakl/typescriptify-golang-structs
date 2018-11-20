@@ -1,9 +1,9 @@
 package typescriptify
 
 import (
+	"os"
 	"reflect"
 	"strings"
-	"os"
 )
 
 // Convert to string

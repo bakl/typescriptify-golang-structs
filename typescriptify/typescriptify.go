@@ -49,6 +49,7 @@ func New() *TypeScriptify {
 	types[reflect.Uint64] = "number"
 	types[reflect.Float32] = "number"
 	types[reflect.Float64] = "number"
+	types[reflect.Interface] = "any"
 
 	types[reflect.String] = "string"
 

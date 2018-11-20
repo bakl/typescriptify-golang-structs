@@ -1,11 +1,11 @@
 package typescriptify
 
 import (
+	"errors"
+	"fmt"
+	"path"
 	"reflect"
 	"strings"
-	"fmt"
-	"errors"
-	"path"
 )
 
 type typeScriptClassBuilder struct {
@@ -47,6 +47,17 @@ func (t *typeScriptClassBuilder) AddArrayOfStructsField(fieldName, fieldType str
 	t.createFromMethodBody += fmt.Sprintf("%s%sresult.%s = source[\"%s\"] ? source[\"%s\"].map(function(element) { return %s.createFrom(element); }) : null;\n", t.indent, t.indent, fieldName, fieldName, fieldName, fieldType)
 }
 
+func (t *typeScriptClassBuilder) AddMapOfSimpleField(fieldName, keyType string, valueKind reflect.Kind) error {
+	if typeScriptType, ok := t.types[valueKind]; ok {
+		if len(fieldName) > 0 {
+			t.fields += fmt.Sprintf("%s%s: Map<%s, %s>;\n", t.indent, fieldName, keyType, typeScriptType)
+			//@TODO Create From Method?
+			return nil
+		}
+	}
+	return errors.New(fmt.Sprintf("cannot find type for %s (%s)", valueKind.String(), fieldName))
+}
+
 func (t *typeScriptClassBuilder) AddSimpleArrayField(fieldName, fieldType string, kind reflect.Kind) error {
 	if typeScriptType, ok := t.types[kind]; ok {
 		if len(fieldName) > 0 {
@@ -59,7 +70,7 @@ func (t *typeScriptClassBuilder) AddSimpleArrayField(fieldName, fieldType string
 }
 
 func (t *typeScriptClassBuilder) AddSimpleField(fieldName string, field reflect.StructField) error {
-	fieldType, kind := field.Type.Name(), field.Type.Kind()
+	kind := field.Type.Kind()
 	customTSType := field.Tag.Get(tsType)
 
 	typeScriptType := t.types[kind]
@@ -81,6 +92,6 @@ func (t *typeScriptClassBuilder) AddSimpleField(fieldName string, field reflect.
 		return nil
 	}
 
-	return errors.New("Cannot find type for " + fieldType + ", fideld: " + fieldName)
+	return errors.New("Cannot find type for " + field.Type.String() + ", field: " + fieldName)
 }
 
