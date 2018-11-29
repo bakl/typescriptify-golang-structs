@@ -2,7 +2,6 @@ package typescriptify
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
 	"reflect"
 	"strings"
 	"time"
@@ -105,9 +104,20 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 				err = builder.AddSimpleArrayField(jsonFieldName, field.Type.Elem().Name(), field.Type.Elem().Kind())
 			}
 		case reflect.Map:
-			logrus.Info(field.Type.Elem().Name())
-			//@TODO Struct
-			builder.AddMapOfSimpleField(jsonFieldName, field.Type.Key().Name(), field.Type.Elem().Kind())
+			switch field.Type.Elem().Kind() {
+			case reflect.Struct:
+				typeScriptChunk, _, err := t.convertType(field.Type.Elem(), customCode)
+				if err != nil {
+					return "", types, err
+					types = append(types, field.Type.Elem())
+				} else {
+					builder.AddImport(field.Type.Elem().Name(), t.typesPathes[field.Type.Elem()])
+				}
+				result = typeScriptChunk + "\n" + result
+				builder.AddMapOfStructsField(jsonFieldName, field.Type.Key().Name(), field.Type.Elem().Name())
+			default:
+				builder.AddMapOfSimpleField(jsonFieldName, field.Type.Key().Name(), field.Type.Elem().Kind())
+			}
 		default:
 			err = builder.AddSimpleField(jsonFieldName, field)
 		}

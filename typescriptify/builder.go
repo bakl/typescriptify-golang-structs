@@ -47,6 +47,10 @@ func (t *typeScriptClassBuilder) AddArrayOfStructsField(fieldName, fieldType str
 	t.createFromMethodBody += fmt.Sprintf("%s%sresult.%s = source[\"%s\"] ? source[\"%s\"].map(function(element) { return %s.createFrom(element); }) : null;\n", t.indent, t.indent, fieldName, fieldName, fieldName, fieldType)
 }
 
+func (t *typeScriptClassBuilder) AddMapOfStructsField(fieldName, keyType string, fieldType string) {
+	t.fields += fmt.Sprintf("%s%s: Map<%s, %s>;\n", t.indent, fieldName, keyType, fieldType)
+}
+
 func (t *typeScriptClassBuilder) AddMapOfSimpleField(fieldName, keyType string, valueKind reflect.Kind) error {
 	if typeScriptType, ok := t.types[valueKind]; ok {
 		if len(fieldName) > 0 {
