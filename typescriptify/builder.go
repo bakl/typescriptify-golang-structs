@@ -48,13 +48,13 @@ func (t *typeScriptClassBuilder) AddArrayOfStructsField(fieldName, fieldType str
 }
 
 func (t *typeScriptClassBuilder) AddMapOfStructsField(fieldName, keyType string, fieldType string) {
-	t.fields += fmt.Sprintf("%s%s: Map<%s, %s>;\n", t.indent, fieldName, keyType, fieldType)
+	t.fields += fmt.Sprintf("%s%s: {[key: %s]: %s};\n", t.indent, fieldName, keyType, fieldType)
 }
 
 func (t *typeScriptClassBuilder) AddMapOfSimpleField(fieldName, keyType string, valueKind reflect.Kind) error {
 	if typeScriptType, ok := t.types[valueKind]; ok {
 		if len(fieldName) > 0 {
-			t.fields += fmt.Sprintf("%s%s: Map<%s, %s>;\n", t.indent, fieldName, keyType, typeScriptType)
+			t.fields += fmt.Sprintf("%s%s: {[key: %s]: %s};\n", t.indent, fieldName, keyType, typeScriptType)
 			//@TODO Create From Method?
 			return nil
 		}
