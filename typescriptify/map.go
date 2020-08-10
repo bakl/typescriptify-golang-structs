@@ -90,16 +90,22 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 			}
 			builder.AddStructField(jsonFieldName, name)
 		case reflect.Slice:
-			if field.Type.Elem().Kind() == reflect.Struct { // Slice of structs:
-				typeScriptChunk, _, err := t.convertType(field.Type.Elem(), customCode)
+			elem := field.Type.Elem()
+
+			if elem.Kind() == reflect.Ptr {
+				elem = field.Type.Elem().Elem()
+			}
+
+			if elem.Kind() == reflect.Struct { // Slice of structs:
+				typeScriptChunk, _, err := t.convertType(elem, customCode)
 				if err != nil {
 					return "", types, err
-					types = append(types, field.Type.Elem())
+					types = append(types, elem)
 				} else {
-					builder.AddImport(field.Type.Elem().Name(), t.typesPathes[field.Type.Elem()])
+					builder.AddImport(elem.Name(), t.typesPathes[elem])
 				}
 				result = typeScriptChunk + "\n" + result
-				builder.AddArrayOfStructsField(jsonFieldName, field.Type.Elem().Name())
+				builder.AddArrayOfStructsField(jsonFieldName, elem.Name())
 			} else { // Slice of simple fields:
 				err = builder.AddSimpleArrayField(jsonFieldName, field.Type.Elem().Name(), field.Type.Elem().Kind())
 			}
