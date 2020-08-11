@@ -21,6 +21,8 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 		return "", types, nil
 	}
 
+	fmt.Printf("Converting: %s\n", typeOf.Name())
+
 	types = append(types, typeOf)
 
 	t.alreadyConverted[typeOf] = true
@@ -73,7 +75,8 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 		case reflect.Struct:
 			name := field.Type.Name()
 
-			typeScriptChunk, _, err := t.convertType(field.Type, customCode)
+			typeScriptChunk, newTypes, err := t.convertType(field.Type, customCode)
+			types = append(types, newTypes...)
 			if err != nil {
 				return "", types, err
 			}
@@ -97,10 +100,10 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 			}
 
 			if elem.Kind() == reflect.Struct { // Slice of structs:
-				typeScriptChunk, _, err := t.convertType(elem, customCode)
+				typeScriptChunk, newTypes, err := t.convertType(elem, customCode)
+				types = append(types, newTypes...)
 				if err != nil {
 					return "", types, err
-					types = append(types, elem)
 				} else {
 					builder.AddImport(elem.Name(), t.typesPathes[elem])
 				}
@@ -112,10 +115,10 @@ func (t *TypeScriptify) convertType(typeOf reflect.Type, customCode map[string]s
 		case reflect.Map:
 			switch field.Type.Elem().Kind() {
 			case reflect.Struct:
-				typeScriptChunk, _, err := t.convertType(field.Type.Elem(), customCode)
+				typeScriptChunk, newTypes, err := t.convertType(field.Type.Elem(), customCode)
+				types = append(types, newTypes...)
 				if err != nil {
 					return "", types, err
-					types = append(types, field.Type.Elem())
 				} else {
 					builder.AddImport(field.Type.Elem().Name(), t.typesPathes[field.Type.Elem()])
 				}

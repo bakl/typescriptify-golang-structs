@@ -1,6 +1,7 @@
 package typescriptify
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -28,6 +29,8 @@ func (t *TypeScriptify) Convert(customCode map[string]string) (map[reflect.Type]
 
 // Convert to files
 func (t TypeScriptify) ConvertToFiles() error {
+	fmt.Println("Start converting to files...")
+
 	t.alreadyConverted = make(map[reflect.Type]bool)
 	t.typesPathes = make(map[reflect.Type]string)
 
@@ -41,6 +44,7 @@ func (t TypeScriptify) ConvertToFiles() error {
 			return err
 		}
 
+		_, err = fmt.Printf("Processing: %s [%s] \n", typeof.Name(), fileName)
 		typeScriptCode, types, err := t.convertType(typeof, customCode)
 		if err != nil {
 			return err
@@ -70,6 +74,12 @@ func (t TypeScriptify) ConvertToFiles() error {
 		}
 
 		f.Close()
+	}
+
+	fmt.Println("")
+	fmt.Println("Types locations:")
+	for key, val := range t.typesPathes {
+		fmt.Printf("%s: %s\n", key, val)
 	}
 
 	return nil
